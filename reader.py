@@ -13,13 +13,15 @@ inputdataList = [] ## Start with empty list for RSC ID, Name, Tracker Link
 linksList = [] ## Start with empty list for tracker links
 identList = [] ## Start with empty list for platform & ident -> (platform/identifier)
 api_linksList = [] ## Start with empty list for profile api links
-
+countLinks = 0
+count = 0
 
 with open('trackers.csv') as csvfile: ## Opens Trackers input file
     trackers = csv.reader(csvfile) 
 
     for row in trackers: ## For every row in trackers ->
-        inputdataList.append(row[0:3]) ## Add to data list -> [0]RSC ID,[1]Name,[2]Link ([start:end-1]) 
+        if row[0]:
+            inputdataList.append(row[0:3]) ## Add to data list -> [0]RSC ID,[1]Name,[2]Link ([start:end-1]) 
 
     for data in inputdataList: ## For every entry in data List ->
         linksList.append(data[2]) ## Add trackers links to links list
@@ -45,5 +47,8 @@ with open('trackers.csv') as csvfile: ## Opens Trackers input file
 print(f"{len(api_linksList)} Entries in file")
 print("-------------------------------------")
 for link in api_linksList:
-    print(link)
+    countLinks += 1
+    print(str(inputdataList[count][0]) + " " + str(countLinks) +") " + link)
+    count += 1
+
     
