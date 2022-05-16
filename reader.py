@@ -1,6 +1,7 @@
 import csv
-from sys import api_version
+from re import L
 import constants as cons
+
 
 ## trn ID from overview - > Network -> Steam ID -> data -> metadata -> playerId
 
@@ -30,7 +31,10 @@ with open('trackers.csv') as csvfile: ## Opens Trackers input file
         if 'https://rocketleague.tracker.network/rocket-league/profile/' in link:
             ident = link.split('/', 5) ## Remove link info (Counts # of '/'), keep identifiers
             ident = [ident.replace('/overview', '') for ident in ident] ## Remove '/overview' from links
+            if "mmr?playlist=" in ident[5]:
+                ident[5] = ident[5][0:14]
             identList.append(ident[5]) ## Add identifiers to indentifier list
+            
     else:
         if 'https://rocketleague.tracker.network/rocket-league/profile/' not in link:
             identList.append("BAD-LINK")
@@ -40,7 +44,7 @@ with open('trackers.csv') as csvfile: ## Opens Trackers input file
             api_linksList.append(cons.PROF_ENDP + ident)
         else:
             api_linksList.append(ident)
-
+    print(identList)
 
 
 
@@ -50,5 +54,6 @@ for link in api_linksList:
     countLinks += 1
     print(str(inputdataList[count][0]) + " " + str(countLinks) +") " + link)
     count += 1
+
 
     
