@@ -3,6 +3,7 @@ import asyncio
 import aiohttp
 import json
 import csv
+import config as config
 from datetime import datetime
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
@@ -62,7 +63,7 @@ with open('trackers.csv') as csvfile: ## Opens Trackers input file
 
 
 async def pullMMR(profEndPointList):
-    scrape = datetime.strptime('2022-03-11', '%Y-%m-%d')
+    scrape = datetime.strptime(config.scrapeDate, '%Y-%m-%d')
     count = 0
     listCount = 0
     async with aiohttp.ClientSession() as client:
