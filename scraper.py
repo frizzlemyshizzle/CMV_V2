@@ -12,16 +12,17 @@ chrome = Chrome('D:\Chromedriver\chromedriver.exe')
 inputdataList = [] ## Start with empty list for RSC ID, Name, Tracker Link
 linksList = [] ## Start with empty list for tracker links
 identList = [] ## Start with empty list for platform & ident -> (platform/identifier)
-profEndPointList = [] ## Start with empty list for profile api links
-histEndPointList = []
-trnIdList = []
-finishedList = []
+profEndPointList = [] ## Start with empty list for profile endpoint links
+histEndPointList = [] ## Start with empty list for history endpoint links
+trnIdList = [] ## ## Start with empty list for tracker network IDs
+finishedList = [] ## Start with empty finished list
 
-
+## Lists for holding 3s Data
 threesRatingdateHolder = []
 threesRatingHolder = []
 threesRatingList = []
 
+## Lists for holding 2s Data
 doublesRatingdateHolder = []
 doublesRatingHolder = []
 doublesRatingList = []
