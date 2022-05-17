@@ -48,7 +48,7 @@ with open('trackers.csv') as csvfile: ## Opens Trackers input file
             ident = link.split('/', 5) ## Remove link info (Counts # of '/'), keep identifiers
             ident = [ident.replace('/overview', '') for ident in ident] ## Remove '/overview' from links
             if "mmr?playlist=" in ident[5]:
-                ident[5] = ident[5][0:14]
+                ident[5] = ident[5][0:len(ident)-21]
             identList.append(ident[5]) ## Add identifiers to indentifier list
         else:
             identList.append("BAD-LINK")
@@ -59,7 +59,7 @@ with open('trackers.csv') as csvfile: ## Opens Trackers input file
         else:
             profEndPointList.append(cons.PROF_ENDP + ident)
     print(profEndPointList)
-    
+
 
 
 async def pullMMR(profEndPointList):
@@ -78,75 +78,91 @@ async def pullMMR(profEndPointList):
 
 
         for link in profEndPointList: ## For each link in profile endpoint list ->
+            
             if "BAD-LINK" not in link: ## If link not flagged 
-                count += 1
                 chrome.get(link) ## Open link with Chrome Driver
                 jsonRAWOverview = chrome.find_element(by=By.TAG_NAME, value="pre").text ## Retreive page contents
-                data = json.loads(jsonRAWOverview)['data'] ## Load all data as json
-                trnIdList.append(str(count) + ") " + str(data['metadata']['playerId'])) ## Obtain Tracker Network ID, add to trnIdList and number
+                if 'We could not find the player' not in jsonRAWOverview:
+                    data = json.loads(jsonRAWOverview)['data'] ## Load all data as json
+                    trnIdList.append(str(data['metadata']['playerId'])) ## Obtain Tracker Network ID, add to trnIdList
+                else:
+                    trnIdList.append("BAD-LINK")
             else:
+                trnIdList.append("BAD-LINK")
+
+  
+        for id in trnIdList: ## For each id in trnIdList ->
+            histEndPointList.append(cons.HIST_ENDP + str(id)) ## Create endpoint links and add to list
+            
+        for link in histEndPointList: ## For each endpoint link in list ->
+            if "BAD-LINK" not in link:
+                chrome.get(link) ## Open page with Chrome Driver
+                jsonRAWOverview = chrome.find_element(by=By.TAG_NAME, value="pre").text ## Load all data as json
+                threesData = json.loads(jsonRAWOverview)['data']['13'] ## Obtain all Threes MMRs
+                doublesData = json.loads(jsonRAWOverview)['data']['11'] ## Obtain all Doubles MMRs
+
+
+                ''' The below for loop blocks work identically aside from assigning to different lists to record data for both
+                    threes and twos game modes.
+                '''
+                for segment in doublesData: ## For each recorded rating in doublesData ->
+                    doublesRatingHolder.append(str(segment['rating'])) ## Add rating to holder list
+                    doublesRatingdateHolder.append(segment['collectDate']) ## Add recorded date of rating to date holder list
+                for item in doublesRatingdateHolder: ## For each item in doubles rating holder ->
+                    date = str(item[0:10]) ## Take 'yyyy-mm-dd'' as date
+                    date = datetime.strptime(date, '%Y-%m-%d') ## Convert to time 
+                    if date >= scrape: ## If date of rating collection is after scrape date ->
+                        dateIdx = doublesRatingdateHolder.index(item) ## Store index of date
+                        doublesRatingList.append(int(doublesRatingHolder[dateIdx])) ## Add index equivalent elmnt from rating holder list to zoned list
+
+
+                for segment in threesData:
+                    threesRatingHolder.append(str(segment['rating']))
+                    threesRatingdateHolder.append(segment['collectDate'])
+                for item in threesRatingdateHolder:
+                    date = str(item[0:10])
+                    date = datetime.strptime(date, '%Y-%m-%d')
+                    if date > scrape:
+                        dateIdx = threesRatingdateHolder.index(item)
+                        threesRatingList.append(int(threesRatingHolder[dateIdx]))
+            
+
+
+                threesPeak = max(threesRatingList) ## Take 3s peak as max value in list
+                doublesPeak = max(doublesRatingList) ## Take 2s peak as max value in list
+                finishedList.append(inputdataList[listCount])
+                finishedList[listCount].append(doublesPeak)
+                finishedList[listCount].append(threesPeak)
+                
+
+                ## Clear lists before looping
+                threesRatingdateHolder.clear()
+                threesRatingHolder.clear()
+                threesRatingList.clear()
+
+
+                doublesRatingdateHolder.clear()
+                doublesRatingHolder.clear()
+                doublesRatingList.clear()
+                listCount += 1
+
+            else:
+                
                 finishedList.append(inputdataList[listCount])
                 finishedList[listCount].append("BAD-LINK")
                 finishedList[listCount].append("BAD-LINK")
+                
+
+                ## Clear lists before looping
+                threesRatingdateHolder.clear()
+                threesRatingHolder.clear()
+                threesRatingList.clear()
+
+
+                doublesRatingdateHolder.clear()
+                doublesRatingHolder.clear()
+                doublesRatingList.clear()
                 listCount += 1
-                print("BAD-LINK")
-            
-  
-        for id in trnIdList: ## For each id in trnIdList ->
-            histEndPointList.append(cons.HIST_ENDP + str(id[3:])) ## Create endpoint links and add to list
-
-            
-        for link in histEndPointList: ## For each endpoint link in list ->
-            chrome.get(link) ## Open page with Chrome Driver
-            jsonRAWOverview = chrome.find_element(by=By.TAG_NAME, value="pre").text ## Load all data as json
-            threesData = json.loads(jsonRAWOverview)['data']['13'] ## Obtain all Threes MMRs
-            doublesData = json.loads(jsonRAWOverview)['data']['11'] ## Obtain all Doubles MMRs
-
-
-            ''' The below for loop blocks work identically aside from assigning to different lists to record data for both
-                threes and doubles game modes.
-            '''
-            for segment in doublesData: ## For each recorded rating in doublesData ->
-                doublesRatingHolder.append(str(segment['rating'])) ## Add rating to holder list
-                doublesRatingdateHolder.append(segment['collectDate']) ## Add recorded date of rating to holder list
-            for item in doublesRatingdateHolder: ## For each item in doubles rating holder ->
-                date = str(item[0:10]) ## Take 'yyyy-mm-dd'' as date
-                date = datetime.strptime(date, '%Y-%m-%d') ## Convert to time 
-                if date >= scrape: ## If date of rating collection is after scrape date ->
-                    dateIdx = doublesRatingdateHolder.index(item) ## Store index of date
-                    doublesRatingList.append(int(doublesRatingHolder[dateIdx])) ## Add index equivalent elmnt from rating holder list to zoned list
-
-
-            for segment in threesData:
-                threesRatingHolder.append(str(segment['rating']))
-                threesRatingdateHolder.append(segment['collectDate'])
-            for item in threesRatingdateHolder:
-                date = str(item[0:10])
-                date = datetime.strptime(date, '%Y-%m-%d')
-                if date > scrape:
-                    dateIdx = threesRatingdateHolder.index(item)
-                    threesRatingList.append(int(threesRatingHolder[dateIdx]))
-        
-
-
-            threesPeak = max(threesRatingList) ## Take 3s peak as max value in list
-            doublesPeak = max(doublesRatingList) ## Take 2s peak as max value in list
-            finishedList.append(inputdataList[listCount])
-            finishedList[listCount].append(doublesPeak)
-            finishedList[listCount].append(threesPeak)
-            
-
-            ## Clear lists before looping
-            threesRatingdateHolder.clear()
-            threesRatingHolder.clear()
-            threesRatingList.clear()
-
-
-            doublesRatingdateHolder.clear()
-            doublesRatingHolder.clear()
-            doublesRatingList.clear()
-            listCount += 1
-
 
 
 
@@ -173,4 +189,3 @@ async def main():
 
 start_time = time.time()
 asyncio.run(main())
-print(finishedList)
