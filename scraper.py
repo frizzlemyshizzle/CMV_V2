@@ -145,7 +145,6 @@ async def pullMMR(profEndPointList):
         headerList = ['RSC ID', 'Name', 'Link', 'Peak 2s', 'Peak 3s']
         writeCount = 1
         write = csv.writer(output, headerList)
-        write.writerow(headerList)
         for set in finishedList:
             print(f'Writing MMRs for entry {writeCount} of {len(finishedList)}')
             write.writerow(set)
