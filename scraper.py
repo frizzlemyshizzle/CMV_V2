@@ -96,9 +96,8 @@ async def pullMMR(profEndPointList):
             if "BAD-LINK" not in link:
                 chrome.get(link) ## Open page with Chrome Driver
                 jsonRAWOverview = chrome.find_element(by=By.TAG_NAME, value="pre").text ## Load all data as json
-
-                if '13' and '11' in json.loads(jsonRAWOverview)['data']:
-                    threesData = json.loads(jsonRAWOverview)['data']['13'] ## Obtain all Threes MMRs
+                finishedList.append(inputdataList[listCount])
+                if '11' in json.loads(jsonRAWOverview)['data']:
                     doublesData = json.loads(jsonRAWOverview)['data']['11'] ## Obtain all Doubles MMRs
                     ''' The below for loop blocks work identically aside from assigning to different lists to record data for both
                         threes and twos game modes.
@@ -114,123 +113,61 @@ async def pullMMR(profEndPointList):
                         if date >= scrape: ## If date of rating collection is after scrape date ->
                             dateIdx = doublesRatingdateHolder.index(item) ## Store index of date
                             doublesRatingList.append(int(doublesRatingHolder[dateIdx])) ## Add index equivalent elmnt from rating holder list to zoned list
+                    doublesPeak = max(doublesRatingList) ## Take 2s peak as max value in list
+
+                    finishedList[listCount].append(doublesPeak)
+                    
+                else:
+                    doublesPeak = "NO-GAMES" 
+
+                    finishedList[listCount].append(doublesPeak)
 
 
+                if '13' in json.loads(jsonRAWOverview)['data']:
+                    threesData = json.loads(jsonRAWOverview)['data']['13']
+                    ''' The below for loop blocks work identically aside from assigning to different lists to record data for both
+                        threes and twos game modes.
+                    '''
                     for segment in threesData:
                         threesRatingHolder.append(str(segment['rating']))
-                        threesRatingdateHolder.append(segment['collectDate'])
+                        threesRatingdateHolder.append(segment['collectDate']) 
 
                     for item in threesRatingdateHolder:
                         date = str(item[0:10])
                         date = datetime.strptime(date, '%Y-%m-%d')
 
-                        if date > scrape:
+                        if date >= scrape:
                             dateIdx = threesRatingdateHolder.index(item)
                             threesRatingList.append(int(threesRatingHolder[dateIdx]))
+                    threesPeak = max(threesRatingList)
+
+                    finishedList[listCount].append(threesPeak)
+                    
+                else:
+                    threesPeak = "NO-GAMES" 
+
+                    finishedList[listCount].append(threesPeak)
+
                 
-
-
-                    threesPeak = max(threesRatingList) ## Take 3s peak as max value in list
-                    doublesPeak = max(doublesRatingList) ## Take 2s peak as max value in list
-                    finishedList.append(inputdataList[listCount])
-                    finishedList[listCount].append(doublesPeak)
-                    finishedList[listCount].append(threesPeak)
-                        
-
-                    ## Clear lists before looping
-                    threesRatingdateHolder.clear()
-                    threesRatingHolder.clear()
-                    threesRatingList.clear()
-
-
-                    doublesRatingdateHolder.clear()
-                    doublesRatingHolder.clear()
-                    doublesRatingList.clear()
-
-                if '13' not in json.loads(jsonRAWOverview)['data']:
-                    doublesData = json.loads(jsonRAWOverview)['data']['11'] ## Obtain all Doubles MMRs
-
-                    for segment in doublesData: ## For each recorded rating in doublesData ->
-                        doublesRatingHolder.append(str(segment['rating'])) ## Add rating to holder list
-                        doublesRatingdateHolder.append(segment['collectDate']) ## Add recorded date of rating to date holder list
-
-                    for item in doublesRatingdateHolder: ## For each item in doubles rating holder ->
-                        date = str(item[0:10]) ## Take 'yyyy-mm-dd'' as date
-                        date = datetime.strptime(date, '%Y-%m-%d') ## Convert to time 
-
-                        if date >= scrape: ## If date of rating collection is after scrape date ->
-                            dateIdx = doublesRatingdateHolder.index(item) ## Store index of date
-                            doublesRatingList.append(int(doublesRatingHolder[dateIdx])) ## Add index equivalent elmnt from rating holder list to zoned list
-
-                    threesPeak = "NO-GAMES" ## Take 3s peak as max value in list
-                    doublesPeak = max(doublesRatingList) ## Take 2s peak as max value in list
-                    finishedList.append(inputdataList[listCount])
-                    finishedList[listCount].append(doublesPeak)
-                    finishedList[listCount].append(threesPeak)
-                        
-
-                    ## Clear lists before looping
-                    threesRatingdateHolder.clear()
-                    threesRatingHolder.clear()
-                    threesRatingList.clear()
-
-
-                    doublesRatingdateHolder.clear()
-                    doublesRatingHolder.clear()
-                    doublesRatingList.clear()
-
-                if '11' not in json.loads(jsonRAWOverview)['data']:
-                    threesData = json.loads(jsonRAWOverview)['data']['13'] ## Obtain all Doubles MMRs
-
-                    for segment in threesData:
-                        threesRatingHolder.append(str(segment['rating']))
-                        threesRatingdateHolder.append(segment['collectDate'])
-
-                    for item in threesRatingdateHolder:
-                        date = str(item[0:10])
-                        date = datetime.strptime(date, '%Y-%m-%d')
-
-                        if date > scrape:
-                            dateIdx = threesRatingdateHolder.index(item)
-                            threesRatingList.append(int(threesRatingHolder[dateIdx]))
-
-                    threesPeak = max(threesRatingList) ## Take 3s peak as max value in list
-                    doublesPeak = "NO-GAMES" ## Take 2s peak as max value in list
-                    finishedList.append(inputdataList[listCount])
-                    finishedList[listCount].append(doublesPeak)
-                    finishedList[listCount].append(threesPeak)
-                        
-
-                    ## Clear lists before looping
-                    threesRatingdateHolder.clear()
-                    threesRatingHolder.clear()
-                    threesRatingList.clear()
-
-
-                    doublesRatingdateHolder.clear()
-                    doublesRatingHolder.clear()
-                    doublesRatingList.clear()
-
-
 
             else:
                 
-                finishedList.append(inputdataList[listCount])
+
                 finishedList[listCount].append("BAD-LINK")
                 finishedList[listCount].append("BAD-LINK")
                 
 
-                ## Clear lists before looping
-                threesRatingdateHolder.clear()
-                threesRatingHolder.clear()
-                threesRatingList.clear()
+            ## Clear lists before looping
+            threesRatingdateHolder.clear()
+            threesRatingHolder.clear()
+            threesRatingList.clear()
 
 
-                doublesRatingdateHolder.clear()
-                doublesRatingHolder.clear()
-                doublesRatingList.clear()
-
+            doublesRatingdateHolder.clear()
+            doublesRatingHolder.clear()
+            doublesRatingList.clear()
             listCount += 1
+
 
             
                     
