@@ -125,9 +125,7 @@ async def pullMMR(profEndPointList):
 
                 if '13' in json.loads(jsonRAWOverview)['data']:
                     threesData = json.loads(jsonRAWOverview)['data']['13']
-                    ''' The below for loop blocks work identically aside from assigning to different lists to record data for both
-                        threes and twos game modes.
-                    '''
+
                     for segment in threesData:
                         threesRatingHolder.append(str(segment['rating']))
                         threesRatingdateHolder.append(segment['collectDate']) 
@@ -140,7 +138,6 @@ async def pullMMR(profEndPointList):
                             dateIdx = threesRatingdateHolder.index(item)
                             threesRatingList.append(int(threesRatingHolder[dateIdx]))
                     threesPeak = max(threesRatingList)
-
                     finishedList[listCount].append(threesPeak)
                     
                 else:
@@ -151,8 +148,7 @@ async def pullMMR(profEndPointList):
                 
 
             else:
-                
-
+                finishedList.append(inputdataList[listCount])
                 finishedList[listCount].append("BAD-LINK")
                 finishedList[listCount].append("BAD-LINK")
                 

@@ -3,4 +3,4 @@
 '''
 
 ## yyyy-mm-dd
-scrapeDate = '2022-03-11'
+scrapeDate = '2021-07-01'
